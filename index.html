@@ -9,14 +9,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root{
-    --sand: #EFE6D6;
-    --card: #FBF7EF;
-    --ink: #2E2A22;
-    --ink-soft: #6B6355;
-    --clay: #A8763E;
-    --clay-deep: #7C5527;
-    --line: #DDD0B5;
-    --done: #6E7F5C;
+    --sand: #FBE3ED;
+    --card: #FFF7FA;
+    --ink: #5C2942;
+    --ink-soft: #A66E8C;
+    --clay: #EC6FA3;
+    --clay-deep: #D1447E;
+    --line: #F6D2E2;
+    --done: #E85C97;
   }
 
   * { box-sizing: border-box; }
@@ -115,6 +115,7 @@
     color: var(--ink);
     padding:4px 2px 6px;
     outline:none;
+    resize:none;
   }
 
   input[type=text]:focus, textarea:focus{
@@ -128,28 +129,20 @@
 
   .day{
     display:flex;
-    align-items:center;
+    align-items:flex-start;
     gap:12px;
-    padding: 12px 0;
+    padding: 14px 0;
     border-bottom: 1px solid var(--line);
   }
 
   .day-label{
-    width:46px;
+    width:38px;
     flex-shrink:0;
     font-family:'Fraunces', serif;
     font-weight:600;
     font-size:15px;
     color: var(--clay-deep);
-  }
-
-  .day-label .num{
-    display:block;
-    font-family:'Inter', sans-serif;
-    font-weight:500;
-    font-size:10.5px;
-    color: var(--ink-soft);
-    margin-top:1px;
+    padding-top:5px;
   }
 
   .day-input{
@@ -157,15 +150,34 @@
     min-width:0;
   }
 
-  .day-input input{
+  .day-input textarea{
     border-bottom: none;
-    padding: 2px 0;
+    padding: 4px 2px;
+    display:block;
+    min-height: 46px;
+    line-height:1.4;
   }
 
-  .day.done .day-input input{
+  .day.done .day-input textarea{
     color: var(--done);
     text-decoration: line-through;
-    text-decoration-color: rgba(110,127,92,0.5);
+    text-decoration-color: rgba(232,92,151,0.5);
+  }
+
+  .day-input-render{
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    color: var(--ink);
+    padding:4px 2px;
+    line-height:1.4;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+  }
+
+  .day.done .day-input-render{
+    color: var(--done);
+    text-decoration: line-through;
+    text-decoration-color: rgba(232,92,151,0.5);
   }
 
   .check{
@@ -180,6 +192,7 @@
     justify-content:center;
     background: transparent;
     transition: background 0.15s, border-color 0.15s;
+    margin-top:5px;
   }
 
   .check svg{
@@ -195,20 +208,6 @@
   }
 
   .day.done .check svg{ opacity:1; }
-
-  #note-block{
-    margin-top: 20px;
-  }
-
-  #note{
-    width:100%;
-    min-height: 54px;
-    resize:none;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 10px 12px;
-    line-height:1.4;
-  }
 
   #footer-line{
     margin-top: 22px;
@@ -295,11 +294,6 @@
 
   <div id="days"></div>
 
-  <div id="note-block">
-    <label class="small">Destaque da semana</label>
-    <textarea id="note" placeholder="O que funcionou, o que foi mais difícil..."></textarea>
-  </div>
-
   <div id="footer-line">
     <span>Dias treinados</span>
     <span id="tally">0 / 7</span>
@@ -314,25 +308,17 @@
 <div id="hint">No celular: toque em "Baixar imagem" e escolha o grupo do WhatsApp direto na tela de compartilhamento. No computador, a imagem é salva na pasta de downloads.</div>
 
 <script>
-  const dayNames = [
-    {abbr:'SEG', full:'Segunda'},
-    {abbr:'TER', full:'Terça'},
-    {abbr:'QUA', full:'Quarta'},
-    {abbr:'QUI', full:'Quinta'},
-    {abbr:'SEX', full:'Sexta'},
-    {abbr:'SÁB', full:'Sábado'},
-    {abbr:'DOM', full:'Domingo'}
-  ];
+  const dayAbbrs = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB', 'DOM'];
 
   const daysContainer = document.getElementById('days');
 
-  dayNames.forEach((d, i) => {
+  dayAbbrs.forEach((abbr, i) => {
     const row = document.createElement('div');
     row.className = 'day';
     row.dataset.index = i;
     row.innerHTML = `
-      <div class="day-label">${d.abbr}<span class="num">${d.full}</span></div>
-      <div class="day-input"><input type="text" placeholder="Qual foi o treino?"></div>
+      <div class="day-label">${abbr}</div>
+      <div class="day-input"><textarea rows="2" placeholder="Qual foi o treino?"></textarea></div>
       <div class="check" role="checkbox" aria-checked="false" tabindex="0">
         <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"></polyline>
@@ -340,6 +326,15 @@
       </div>
     `;
     daysContainer.appendChild(row);
+  });
+
+  function autoGrow(el){
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
+  daysContainer.addEventListener('input', (e) => {
+    if(e.target.tagName === 'TEXTAREA') autoGrow(e.target);
   });
 
   function updateTally(){
@@ -367,8 +362,10 @@
   document.getElementById('resetBtn').addEventListener('click', () => {
     document.getElementById('memberName').value = '';
     document.getElementById('weekRange').value = '';
-    document.getElementById('note').value = '';
-    document.querySelectorAll('.day-input input').forEach(i => i.value = '');
+    document.querySelectorAll('.day-input textarea').forEach(t => {
+      t.value = '';
+      t.style.height = '';
+    });
     document.querySelectorAll('.day').forEach(row => {
       row.classList.remove('done');
       row.querySelector('.check').setAttribute('aria-checked','false');
@@ -380,9 +377,50 @@
     const card = document.getElementById('card');
     const name = document.getElementById('memberName').value.trim() || 'checkin';
     const filename = `checkin-${name.toLowerCase().replace(/\s+/g,'-')}.png`;
+    const STORY_W = 1080, STORY_H = 1920;
 
-    html2canvas(card, {backgroundColor: '#EFE6D6', scale: 2}).then(canvas => {
-      canvas.toBlob(async (blob) => {
+    const swaps = [];
+    document.querySelectorAll('.day-input textarea').forEach(ta => {
+      const div = document.createElement('div');
+      div.className = 'day-input-render';
+      div.textContent = ta.value;
+      ta.style.display = 'none';
+      ta.after(div);
+      swaps.push({ta, div});
+    });
+
+    html2canvas(card, {backgroundColor: '#FFF7FA', scale: 2}).then(cardCanvas => {
+      swaps.forEach(({ta, div}) => {
+        div.remove();
+        ta.style.display = '';
+      });
+
+      const out = document.createElement('canvas');
+      out.width = STORY_W;
+      out.height = STORY_H;
+      const ctx = out.getContext('2d');
+
+      const gradient = ctx.createLinearGradient(0, 0, 0, STORY_H);
+      gradient.addColorStop(0, '#FFD3E6');
+      gradient.addColorStop(1, '#F383B3');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, STORY_W, STORY_H);
+
+      const margin = 70;
+      const scale = Math.min((STORY_W - margin * 2) / cardCanvas.width, (STORY_H - margin * 2) / cardCanvas.height);
+      const drawW = cardCanvas.width * scale;
+      const drawH = cardCanvas.height * scale;
+      const dx = (STORY_W - drawW) / 2;
+      const dy = (STORY_H - drawH) / 2;
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(140, 30, 80, 0.28)';
+      ctx.shadowBlur = 45;
+      ctx.shadowOffsetY = 18;
+      ctx.drawImage(cardCanvas, dx, dy, drawW, drawH);
+      ctx.restore();
+
+      out.toBlob(async (blob) => {
         const file = new File([blob], filename, {type: 'image/png'});
 
         if (navigator.canShare && navigator.canShare({files: [file]})) {
