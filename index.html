@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Check-in Semanal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --sand: #EFE6D6;
+    --card: #FBF7EF;
+    --ink: #2E2A22;
+    --ink-soft: #6B6355;
+    --clay: #A8763E;
+    --clay-deep: #7C5527;
+    --line: #DDD0B5;
+    --done: #6E7F5C;
+  }
+
+  * { box-sizing: border-box; }
+
+  body{
+    margin:0;
+    background: var(--sand);
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: 28px 14px 60px;
+  }
+
+  #card{
+    width:100%;
+    max-width:420px;
+    background: var(--card);
+    border-radius: 18px;
+    padding: 30px 24px 26px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+    border: 1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+
+  #card::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:6px;
+    background: repeating-linear-gradient(90deg, var(--clay) 0 14px, transparent 14px 22px);
+    opacity:0.55;
+  }
+
+  .group-name{
+    text-align:center;
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:15px;
+    letter-spacing:0.02em;
+    color: var(--clay);
+    margin-bottom: 18px;
+  }
+
+  .kicker{
+    font-size:12.5px;
+    letter-spacing:0.04em;
+    color: var(--clay-deep);
+    font-weight:600;
+    margin-bottom: 6px;
+  }
+
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size: 30px;
+    line-height:1.08;
+    margin:0 0 4px;
+  }
+
+  .sub{
+    color: var(--ink-soft);
+    font-size:13.5px;
+    margin-bottom: 20px;
+  }
+
+  .field-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:18px;
+  }
+
+  .field{
+    flex:1;
+    min-width:0;
+  }
+
+  label.small{
+    display:block;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color: var(--ink-soft);
+    margin-bottom:4px;
+  }
+
+  input[type=text], textarea{
+    width:100%;
+    border:none;
+    border-bottom: 1.5px solid var(--line);
+    background:transparent;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    color: var(--ink);
+    padding:4px 2px 6px;
+    outline:none;
+  }
+
+  input[type=text]:focus, textarea:focus{
+    border-bottom-color: var(--clay);
+  }
+
+  #days{
+    border-top: 1px solid var(--line);
+    margin-top: 4px;
+  }
+
+  .day{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .day-label{
+    width:46px;
+    flex-shrink:0;
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:15px;
+    color: var(--clay-deep);
+  }
+
+  .day-label .num{
+    display:block;
+    font-family:'Inter', sans-serif;
+    font-weight:500;
+    font-size:10.5px;
+    color: var(--ink-soft);
+    margin-top:1px;
+  }
+
+  .day-input{
+    flex:1;
+    min-width:0;
+  }
+
+  .day-input input{
+    border-bottom: none;
+    padding: 2px 0;
+  }
+
+  .day.done .day-input input{
+    color: var(--done);
+    text-decoration: line-through;
+    text-decoration-color: rgba(110,127,92,0.5);
+  }
+
+  .check{
+    width:22px;
+    height:22px;
+    border-radius:6px;
+    border: 1.5px solid var(--line);
+    flex-shrink:0;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: transparent;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .check svg{
+    width:13px;
+    height:13px;
+    opacity:0;
+    transition: opacity 0.15s;
+  }
+
+  .day.done .check{
+    background: var(--done);
+    border-color: var(--done);
+  }
+
+  .day.done .check svg{ opacity:1; }
+
+  #note-block{
+    margin-top: 20px;
+  }
+
+  #note{
+    width:100%;
+    min-height: 54px;
+    resize:none;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    line-height:1.4;
+  }
+
+  #footer-line{
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--line);
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-size:12px;
+    color: var(--ink-soft);
+  }
+
+  #footer-line input{
+    text-align:right;
+    max-width:120px;
+  }
+
+  #controls{
+    width:100%;
+    max-width:420px;
+    margin-top:18px;
+    display:flex;
+    gap:10px;
+  }
+
+  button.action{
+    flex:1;
+    border:none;
+    border-radius: 10px;
+    padding: 13px 10px;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+  }
+
+  #downloadBtn{
+    background: var(--clay-deep);
+    color: #FBF7EF;
+  }
+
+  #downloadBtn:active{ background: var(--clay); }
+
+  #resetBtn{
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+  }
+
+  #hint{
+    max-width:420px;
+    width:100%;
+    text-align:center;
+    font-size:12px;
+    color: var(--ink-soft);
+    margin-top:10px;
+    line-height:1.5;
+  }
+
+  @media (max-width: 380px){
+    h1{ font-size:26px; }
+    #card{ padding:24px 18px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="card">
+  <div class="group-name">).(&nbsp;&nbsp;Cinturetes Veveciadas&nbsp;&nbsp;).(</div>
+  <div class="kicker">CHECK-IN SEMANAL</div>
+  <h1>Como foi seu treino?</h1>
+  <div class="sub">Preenche, marca o que fez e manda pro grupo.</div>
+
+  <div class="field-row">
+    <div class="field">
+      <label class="small">Nome</label>
+      <input type="text" id="memberName" placeholder="Seu nome">
+    </div>
+    <div class="field">
+      <label class="small">Semana</label>
+      <input type="text" id="weekRange" placeholder="Ex: 28/09 a 04/10">
+    </div>
+  </div>
+
+  <div id="days"></div>
+
+  <div id="note-block">
+    <label class="small">Destaque da semana</label>
+    <textarea id="note" placeholder="O que funcionou, o que foi mais difícil..."></textarea>
+  </div>
+
+  <div id="footer-line">
+    <span>Dias treinados</span>
+    <span id="tally">0 / 7</span>
+  </div>
+</div>
+
+<div id="controls">
+  <button class="action" id="downloadBtn">Baixar imagem</button>
+  <button class="action" id="resetBtn">Limpar</button>
+</div>
+
+<div id="hint">No celular: toque em "Baixar imagem" e depois compartilhe o arquivo salvo direto no grupo do WhatsApp.</div>
+
+<script>
+  const dayNames = [
+    {abbr:'SEG', full:'Segunda'},
+    {abbr:'TER', full:'Terça'},
+    {abbr:'QUA', full:'Quarta'},
+    {abbr:'QUI', full:'Quinta'},
+    {abbr:'SEX', full:'Sexta'},
+    {abbr:'SÁB', full:'Sábado'},
+    {abbr:'DOM', full:'Domingo'}
+  ];
+
+  const daysContainer = document.getElementById('days');
+
+  dayNames.forEach((d, i) => {
+    const row = document.createElement('div');
+    row.className = 'day';
+    row.dataset.index = i;
+    row.innerHTML = `
+      <div class="day-label">${d.abbr}<span class="num">${d.full}</span></div>
+      <div class="day-input"><input type="text" placeholder="Qual foi o treino?"></div>
+      <div class="check" role="checkbox" aria-checked="false" tabindex="0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+    `;
+    daysContainer.appendChild(row);
+  });
+
+  function updateTally(){
+    const done = document.querySelectorAll('.day.done').length;
+    document.getElementById('tally').textContent = `${done} / 7`;
+  }
+
+  daysContainer.addEventListener('click', (e) => {
+    const check = e.target.closest('.check');
+    if(!check) return;
+    const row = check.closest('.day');
+    row.classList.toggle('done');
+    check.setAttribute('aria-checked', row.classList.contains('done'));
+    updateTally();
+  });
+
+  daysContainer.addEventListener('keydown', (e) => {
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    const check = e.target.closest('.check');
+    if(!check) return;
+    e.preventDefault();
+    check.click();
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    document.getElementById('memberName').value = '';
+    document.getElementById('weekRange').value = '';
+    document.getElementById('note').value = '';
+    document.querySelectorAll('.day-input input').forEach(i => i.value = '');
+    document.querySelectorAll('.day').forEach(row => {
+      row.classList.remove('done');
+      row.querySelector('.check').setAttribute('aria-checked','false');
+    });
+    updateTally();
+  });
+
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    const card = document.getElementById('card');
+    html2canvas(card, {backgroundColor: '#EFE6D6', scale: 2}).then(canvas => {
+      const link = document.createElement('a');
+      const name = document.getElementById('memberName').value.trim() || 'checkin';
+      link.download = `checkin-${name.toLowerCase().replace(/\s+/g,'-')}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  });
+</script>
+
+</body>
+</html>
