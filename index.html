@@ -311,7 +311,7 @@
   <button class="action" id="resetBtn">Limpar</button>
 </div>
 
-<div id="hint">No celular: toque em "Baixar imagem" e depois compartilhe o arquivo salvo direto no grupo do WhatsApp.</div>
+<div id="hint">No celular: toque em "Baixar imagem" e escolha o grupo do WhatsApp direto na tela de compartilhamento. No computador, a imagem é salva na pasta de downloads.</div>
 
 <script>
   const dayNames = [
@@ -378,12 +378,29 @@
 
   document.getElementById('downloadBtn').addEventListener('click', () => {
     const card = document.getElementById('card');
+    const name = document.getElementById('memberName').value.trim() || 'checkin';
+    const filename = `checkin-${name.toLowerCase().replace(/\s+/g,'-')}.png`;
+
     html2canvas(card, {backgroundColor: '#EFE6D6', scale: 2}).then(canvas => {
-      const link = document.createElement('a');
-      const name = document.getElementById('memberName').value.trim() || 'checkin';
-      link.download = `checkin-${name.toLowerCase().replace(/\s+/g,'-')}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+      canvas.toBlob(async (blob) => {
+        const file = new File([blob], filename, {type: 'image/png'});
+
+        if (navigator.canShare && navigator.canShare({files: [file]})) {
+          try {
+            await navigator.share({files: [file], title: 'Check-in Semanal'});
+            return;
+          } catch (err) {
+            if (err && err.name === 'AbortError') return;
+          }
+        }
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = url;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }, 'image/png');
     });
   });
 </script>
